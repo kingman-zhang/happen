@@ -1,307 +1,446 @@
 # Happen
 
-## 文档定位
+## Project Overview
 
-这是一份产品验证文档，不是 PRD。
+Happen is a WeChat Mini Program first product for parents of children aged 0-12.
 
-它的目的不是列功能，也不是证明 Happen 一定值得开发，而是明确：
+The first version focuses on recording and reviewing a small set of child health facts:
 
-- Happen 试图解决什么真实问题
-- 哪些问题暂时不解决
-- 为什么用户可能不用它
-- MVP 应该验证什么
-- 什么结果说明可以继续做，什么结果说明应该收缩
+- Bowel movement dates, so parents can quickly know how many days have passed since the last bowel movement.
+- Daily illness notes, so parents can explain a recent fever/illness episode clearly when visiting or revisiting a doctor.
 
-## 一句话描述
+This file defines the project for AI agents and developers. It should guide future brainstorming, planning, TDD, implementation, and code review.
 
-Happen 帮助 0-12 岁儿童家长记录和回看孩子的关键健康事实：平时记录大便间隔，生病时按天记录体温、用药和症状，看医生或复诊前能快速说清楚病程。
+Happen is not currently a broad child event tracker. The initial product should stay narrow until the core assumptions are validated with real parents.
 
-## 当前判断
+## Problem Statement
 
-Happen 第一阶段不应定位为“孩子事件记录工具”。
+Parents often rely on memory, paper calendars, notes apps, WeChat messages to themselves, or Excel to track child health events.
 
-“事件”是一个适合工程实现的抽象，但不是一个足够清晰的用户心智。家长不是为了管理 Event 而打开产品，而是为了回答具体问题：
+These methods are usable, but they break down in specific situations:
 
-- 孩子距离上次大便已经几天了？
-- 这次生病从哪天开始？
-- 每天最高体温是多少？
-- 吃过什么药？
-- 主要症状有哪些？
-- 看医生或复诊时，如何快速讲清楚过去几天发生了什么？
+- During a doctor visit, the parent cannot clearly answer when the fever started, how many days it lasted, the highest temperature, what medicines were taken, and how symptoms changed.
+- A child has irregular bowel movements, and the parent cannot quickly tell whether it has been 2, 3, or 4 days since the last bowel movement.
+- A paper calendar is convenient at home, but not available during an outpatient visit unless the parent remembered to take a photo.
+- Excel is too slow and awkward on mobile for quick caregiving-context recording and review.
 
-因此，Happen 第一阶段应聚焦“健康事实回看”，而不是泛记录、泛打卡或成长纪念。
+The core problem is not "parents have nowhere to write things down."
 
-## 背景痛点
+The core problem is:
 
-当前家长在类似场景中常用日历本、备忘录、Excel 或记忆来记录孩子发生过的事情。
+> Parents need to quickly answer factual questions about recent child health events, but their current recording methods are scattered, hard to review, or unavailable at the moment of need.
 
-这些方式并非不能记录，而是在以下场景中暴露问题：
+## Target Users
 
-- 看医生时，家长说不清孩子哪天开始发烧、烧了几天、最高体温多少、中途吃过什么药、症状如何变化。
-- 孩子大便不规律时，家长需要知道距离上次大便多久，以判断是否需要关注或干预。
-- 纸质日历在家里查看方便，但出门看医生时需要提前拍照，否则无法现场回看。
-- Excel 在手机上打开、编辑和查看成本高，不适合照护孩子时的碎片化记录。
+Primary users:
 
-Happen 的机会不在于“能记录”，而在于记录后能快速回答未来某个关键时刻的问题。
+- Parents of children aged 0-12.
+- Parents who have previously been unable to clearly explain a child's recent illness history during a doctor visit.
+- Parents who need to track irregular bowel movements.
+- Parents who currently use memory, a paper calendar, notes apps, WeChat messages, or Excel for child health facts.
+- Parents who are willing to use a lightweight WeChat Mini Program before a native app exists.
 
-## 目标用户
+Non-primary users:
 
-第一阶段目标用户是 0-12 岁儿童家长，尤其是：
+- Doctors, teachers, course providers, or caregivers as first-class users.
+- Parents looking for a complete child growth album.
+- Parents looking for medical advice, diagnosis, or treatment recommendations.
+- Parents looking for a generic habit tracker or learning task system.
 
-- 曾经在看医生或复诊时说不清孩子病程的家长
-- 需要关注孩子大便间隔的家长
-- 不愿意用 Excel 记录，也不想依赖纸质日历出门回看的家长
-- 愿意用微信小程序做轻量健康事实记录的家长
+## Core Value Proposition
 
-## 非目标
+Happen helps parents record a few important child health facts with low effort and later review them in the form needed for real decisions or conversations.
 
-Happen 第一版明确不做：
+The first version should help answer two questions:
 
-- 成长相册
-- 育儿社区
-- AI 问诊
-- 在线医生
-- 课程平台
-- 阅读打卡
-- 积分兑换
-- 运动记录
-- 刷牙记录
-- 课时管理
-- 泛儿童任务系统
+1. How many days has it been since the child's last bowel movement?
+2. During this illness episode, what happened each day: highest temperature, medicines taken, symptoms, and notes?
 
-这些场景可能也有记录价值，但它们会把产品拖向泛育儿管理工具，削弱第一阶段验证。
+Happen should be better than a paper calendar, notes app, or Excel only in these narrow ways:
 
-## MVP 聚焦
+- Faster mobile entry for the target health facts.
+- Faster review of recent bowel movement interval.
+- Clearer day-by-day illness timeline for doctor visits or revisits.
+- Less dependence on memory or carrying a paper record.
 
-第一版只验证“儿童健康事实记录”是否成立。
+## Product Principles
 
-核心场景有两个：
+### Record facts, not memories
 
-1. 平时记录大便
-2. 生病时记录病程
+Happen records health facts that may need future review. It is not a place for sentimental growth memories, photos, family sharing, or social posts.
 
-大便记录承担日常锚点，但不假设它一定能形成习惯。它需要验证。
+### Review is more important than recording volume
 
-病程记录承担关键价值：当孩子生病、家长需要看医生或复诊时，Happen 能否帮助家长快速回看并组织事实。
+The product should not optimize for the number of records created. It should optimize for whether a parent can answer a future question quickly.
 
-## 关键产品假设
+### Use concrete user language
 
-### 假设一：用户不是为了记录而记录
+Frontend language should use concrete actions:
 
-用户真正关心的不是“我记录了多少事件”，而是：
+- Record bowel movement
+- Record illness day
+- Record temperature
+- Record medicine
+- Record symptoms
+- View illness timeline
 
-- 我现在能否知道孩子几天没大便？
-- 我看医生前能否讲清楚这次病程？
+Avoid exposing generic product language such as:
 
-因此，Happen 的价值应体现在回看和事实整理上，而不是记录数量本身。
+- Add event
+- Event type
+- Event statistics
 
-### 假设二：生病记录强价值但低频
+"Event" can exist as an engineering abstraction, but it should not be the primary user-facing concept.
 
-病程记录痛点强，但孩子不生病时用户不会打开。
+### Keep entry lightweight
 
-如果 Happen 只做病程记录，可能成为一个低频工具。低频工具的问题不是没有价值，而是用户在需要时可能想不起它。
+Parents record during caregiving situations: fever at night, medicine administration, outpatient preparation, or quick checks. Entry must stay quick and editable.
 
-### 假设三：大便记录可能成为日常锚点
+Avoid medical-grade structured entry in MVP:
 
-大便记录比病程记录更高频，并且和健康关注、积食、便秘、发烧前因等场景存在一定关联。
+- No drug database.
+- No strict dosage system.
+- No required exact time for every temperature or medicine.
+- No complex symptom taxonomy.
 
-但这只是一个待验证假设。仅靠“首页显示距离上次大便 X 天”不一定足以让用户持续打开。
+### Do not depend on notifications
 
-### 假设四：第一版不能依赖可靠推送
+WeChat Mini Program notification behavior is limited and unreliable. Reminder features may enhance the product later, but MVP value must hold even without reliable push notifications.
 
-微信小程序的通知能力受限，订阅消息、授权和触达都不稳定。
+### Do not provide medical judgment
 
-因此，提醒只能作为增强能力，不能作为 MVP 成立的前提。第一版必须在没有可靠推送的情况下仍然有价值。
+Happen may organize facts. It must not diagnose, recommend medicine, decide whether to visit a doctor, or replace a doctor.
 
-### 假设五：AI 适合作为第二阶段卖点
+If AI is added later, it must only summarize user-recorded facts.
 
-AI 总结有吸引力，但不应成为第一版核心依赖。
+## MVP Scope
 
-第一版应先保证按天回看的病程时间线准确、清晰、可信。AI 后续只做事实整理，不做医学判断。
+The MVP is limited to child health fact recording and review.
 
-## 记录粒度判断
+### Bowel Movement Tracking
 
-病程记录第一版不追求分钟级事件流。
+MVP should support:
 
-更合适的最小单位是“天”：
+- Recording that a bowel movement happened on a specific date.
+- Editing or deleting a bowel movement record.
+- Showing how many days have passed since the most recent bowel movement.
 
-- 当天最高体温
-- 当天吃过的药
-- 当天主要症状
-- 当天备注
+MVP should not require stool type, color, amount, photos, or medical interpretation.
 
-药物记录可以保留轻量补救，例如允许用户写：
+### Illness Day Notes
 
-- 上午吃了什么
-- 下午吃了什么
-- 睡前吃了什么
-- 大约几点吃了什么
+MVP should support illness records at day-level granularity.
 
-系统不强制医学级时间线，不做严格剂量、药品库或复杂症状体系。
+Each illness day can contain:
 
-这个取舍的核心原因是：家长在孩子生病时处于焦虑、碎片、照护状态，录入成本必须足够低。
+- Date.
+- Highest temperature of that day.
+- Medicines taken that day as free text or multiple lightweight text entries.
+- Main symptoms as simple text or lightweight tags.
+- Optional notes.
 
-## 回看形态判断
+Medicine entries may include user-written timing such as "morning", "afternoon", "before sleep", or "around 8 PM", but the system should not enforce minute-level medical timelines.
 
-第一版最重要的回看形态是按天分组的病程时间线。
+### Illness Timeline Review
 
-它需要帮助家长回答：
+MVP should support:
 
-- 第一天发生了什么？
-- 第二天有没有加重或缓解？
-- 哪天最高体温是多少？
-- 哪天吃过哪些药？
-- 哪些症状持续存在？
+- Viewing an illness episode grouped by day.
+- Seeing the number of days in the illness episode.
+- Reviewing daily highest temperature, medicine text, symptoms, and notes.
 
-第一版不优先做复杂图表，也不以自动总结替代原始记录。
+The timeline should help a parent explain the illness to a doctor. It should not look like a diagnosis report.
 
-## 统计边界
+### Lightweight Statistics
 
-第一版只做服务于回看的轻统计，例如：
+MVP statistics are limited to:
 
-- 距离上次大便 X 天
-- 本次病程持续 X 天
+- Days since last bowel movement.
+- Duration of current/recent illness episode.
 
-不做健康数据仪表盘，不做长期趋势分析，不做用药次数分析，不做复杂健康评估。
+No dashboard-style analytics in MVP.
 
-统计不是第一版核心卖点，回看才是。
+## Out Of Scope
 
-## AI 边界
+The following are explicitly out of scope for the first version:
 
-AI 能做的事情：
+- Growth album.
+- Family photo timeline.
+- Parenting community.
+- AI medical consultation.
+- Online doctor service.
+- Diagnosis or treatment recommendation.
+- Medicine recommendation.
+- Course platform.
+- Class hour tracking.
+- Reading tasks.
+- Points or rewards system.
+- Exercise tracking.
+- Tooth brushing tracking.
+- Generic habit tracking.
+- Generic child task management.
+- Long-term health analytics dashboard.
+- Drug database.
+- Dose calculation.
+- Symptom severity scoring.
+- Stool photo analysis.
+- Doctor-facing workflow.
+- Teacher-facing workflow.
 
-- 基于用户记录，整理事实摘要
-- 将按天病程整理成更容易讲给医生听的文本
+These items should not be added during MVP planning unless the project definition is intentionally revised.
 
-AI 不能做的事情：
+## Core Concepts
 
-- 判断病因
-- 给出诊断
-- 推荐用药
-- 判断是否需要去医院
-- 替代医生建议
+### Child
 
-示例边界：
+The child whose health facts are being recorded.
 
-可以：
+MVP may assume a single child unless multi-child support is explicitly planned. If multi-child support is added, every health fact must belong to exactly one child.
 
-> 6 月 1 日晚开始发热，最高 39.2°C；6 月 2 日服用布洛芬 1 次，退热后反复；伴有咳嗽，精神一般。
+### Health Fact
 
-不可以：
+A recorded factual observation about the child.
 
-> 可能是病毒感染，建议服用某药，暂时不用去医院。
+Examples:
 
-## 产品语言
+- A bowel movement happened on a date.
+- The highest temperature on a date was 39.2°C.
+- A medicine was taken on a date.
+- A symptom was observed on a date.
 
-前端不应使用“事件”作为主要用户语言。
+Health facts should not contain diagnosis, medical advice, or AI-inferred certainty.
 
-建议使用具体动作和具体结果：
+### Bowel Movement Record
 
-- 记大便
-- 记病程
-- 记体温
-- 记用药
-- 记症状
-- 查看病程
-- 距离上次大便
+A simple record that the child had a bowel movement on a date.
 
-“Event”可以作为后端数据模型，但不应成为用户理解产品的入口。
+Primary review question:
 
-## 主要风险
+> How many days has it been since the last bowel movement?
 
-### 风险一：痛点可能只强烈存在于创始人自身
+### Illness Episode
 
-当前需求主要来自创始人作为 6 岁儿童家长的真实体验，尚未经过外部目标用户验证。
+A bounded period of illness that parents want to review as one timeline.
 
-如果其他家长没有类似记录困难，Happen 不应急于做公开推广版。
+Example:
 
-### 风险二：用户没有持续打开理由
+> Fever started on June 1 and continued through June 3.
 
-生病记录低频，大便记录是否能形成日常锚点未知。
+MVP should support reviewing an episode by day. The exact episode boundary model is an open design question.
 
-如果没有可靠推送，用户可能不会主动打开小程序。
+### Illness Day Note
 
-### 风险三：产品范围容易膨胀
+The day-level record inside an illness episode.
 
-阅读、积分、课程、运动、刷牙、课时管理都可以被解释为“发生过的事”，但这些方向会让 Happen 变成泛育儿管理工具。
+Expected fields:
 
-第一版必须克制。
+- Date.
+- Highest temperature.
+- Medicines taken.
+- Main symptoms.
+- Notes.
 
-### 风险四：记录成本超过纸笔和备忘录
+### Timeline
 
-如果打开、录入、修改、回看的成本高于日历本或备忘录，用户不会迁移。
+A day-grouped review of an illness episode.
 
-第一版必须优先验证低成本记录。
+The timeline should preserve original user-entered facts and avoid over-summarizing.
 
-### 风险五：AI 带来误信任
+### AI Fact Summary
 
-如果 AI 摘要看起来像医学判断，或把不完整记录整理得过于确定，会损害用户信任并带来责任边界问题。
+Potential second-stage feature.
 
-AI 应推迟到第二阶段，并明确限制为事实整理。
+Allowed:
 
-## 开发前验证
+- Convert recorded facts into a concise factual summary.
 
-在正式开发公开 MVP 前，先做 5 个目标家长的轻量验证。
+Not allowed:
 
-不要问：
+- Diagnose.
+- Recommend treatment.
+- Suggest medicine.
+- Decide whether medical care is needed.
 
-> 如果有这样一个工具，你会不会用？
+## User Scenarios
 
-而是问具体经历：
+### Scenario 1: Parent Needs to Explain a Fever to a Doctor
 
-1. 最近一次孩子生病、便秘或吃药，你是怎么记录的？
-2. 当时有没有发生“想查但查不到、说不清、记不住”的情况？
-3. 如果有一个小程序只解决“大便间隔 + 病程日记”，你会不会当场收藏或试用？
+The child has had a fever for several days. At the clinic, the doctor asks when the fever started, how high it got, what medicines were used, and what symptoms appeared.
 
-可寻找对象：
+The parent opens Happen and reviews the day-by-day illness timeline.
 
-- 有 0-12 岁孩子的朋友、同事、同学
-- 孩子同班家长中相对熟悉的人
-- 托管、户外课、兴趣班接送时能聊几分钟的家长
-- 朋友圈中最近半年经历过孩子发烧、便秘或吃药记录的家长
+Success condition:
 
-## 继续开发的判断标准
+- The parent can answer from the timeline without relying on memory or searching scattered notes.
 
-5 个家长验证中，如果满足以下条件，可以进入公开 MVP：
+### Scenario 2: Parent Tracks Irregular Bowel Movement
 
-- 至少 3 个家长讲出具体记录困难
-- 至少 2 个家长愿意当场收藏或试用
+The child does not have a bowel movement every day. The parent wants to know whether it has been too long since the last bowel movement.
 
-如果达不到这个标准，Happen 第一阶段应降级为自用极简工具，不投入推广和复杂后端。
+The parent opens Happen and checks the "days since last bowel movement" value.
 
-## 第一阶段成功标准
+Success condition:
 
-第一阶段成功不看日活，也不看功能数量。
+- The parent can know the interval immediately after opening the app.
 
-更合理的成功信号是：
+### Scenario 3: Parent Records During a Busy Illness Day
 
-- 用户能在生病期间完成低成本记录
-- 用户能在看医生或复诊前快速回看病程
-- 用户认为它比纸质日历、备忘录或 Excel 更适合这个场景
-- 用户在下一次类似健康事件中仍愿意回来使用
-- 大便记录是否能让用户形成一定检查习惯得到初步验证
+The child is sick. The parent does not want to fill out a complex form.
 
-## 第一阶段失败信号
+The parent records one daily note: highest temperature, medicines taken, symptoms, and a short note.
 
-以下情况说明应暂停公开产品方向：
+Success condition:
 
-- 用户只觉得“挺好”，但讲不出真实记录困难
-- 用户不愿意当场收藏或试用
-- 用户仍然觉得纸质日历或备忘录更方便
-- 用户只有生病时才想起，但生病时又想不起 Happen
-- 大便记录无法带来任何主动打开
-- 产品为了提高频率开始加入阅读、积分、课程等非健康场景
+- The record is useful later even if it is not medically precise.
+- The parent does not abandon recording because of form complexity.
 
-## 当前结论
+### Scenario 4: Parent Updates a Day Record Later
 
-Happen 值得继续探索，但不应从“儿童事件记录大全”开始。
+The parent first records the morning situation, then later adds afternoon medicine or updates the highest temperature.
 
-更稳妥的第一阶段是：
+Success condition:
 
-> 儿童健康事实记录：平时记大便，生病时记按天病程，看医生时快速回看。
+- The daily record is editable.
+- The final day note reflects the parent's best available facts for that day.
 
-在外部验证通过前，不应急于扩展到阅读、课程、积分、运动、刷牙等场景。
+## Success Metrics
 
-第一版最重要的不是功能完整，而是验证这个判断：
+MVP success should not be measured by daily active users.
 
-> 家长是否真的愿意用一个轻量工具，持续记录少量关键健康事实，并在需要时通过它快速回答过去发生了什么。
+Better validation metrics:
+
+- In a pre-development validation sample of 5 target parents, at least 3 report a concrete difficulty with recording or reviewing child fever, medicine, bowel movement, or similar health facts.
+- In that same sample, at least 2 are willing to immediately save, try, or request access to a tool focused only on bowel movement interval and illness day notes.
+- During real use, parents can create a bowel movement record in a few seconds.
+- During real use, parents can create or update an illness day note without needing a precise medical timeline.
+- During a doctor visit or revisit, a parent can use the timeline to explain the illness history more clearly than memory, paper calendar, notes app, or Excel.
+- Parents who use Happen during one illness episode are willing to return during a later similar episode.
+- Bowel movement tracking shows whether it can create a light checking habit without relying on push notifications.
+
+Failure signals:
+
+- Users say the idea is "useful" but cannot describe a real recent recording/review problem.
+- Users prefer their paper calendar, notes app, WeChat messages, or Excel after trying the MVP.
+- Users only remember the product when shown it, but not when the actual health event happens.
+- The product adds reading, points, course, exercise, or tooth brushing features to chase frequency before validating health facts.
+
+## Technical Constraints
+
+Platform:
+
+- WeChat Mini Program first.
+- Native app may be considered only if the Mini Program validates the use case.
+
+Backend:
+
+- Java service.
+- MongoDB.
+
+Development constraints:
+
+- Independent developer.
+- MVP first.
+- Prefer simple, maintainable implementation over broad feature coverage.
+- Avoid early architecture that assumes a large platform.
+- Avoid adding feature-specific subsystems before the core health fact workflow is validated.
+
+Product/technical implications:
+
+- Data model should allow health fact records to be grouped by child, date, and illness episode.
+- User-facing UI should avoid generic "event management" language even if backend models use generic event-like storage.
+- Reminder design must not assume reliable WeChat push delivery.
+- Any future AI summary must retain links to original user records and must avoid medical advice.
+- Privacy and data sensitivity should be treated seriously because the app stores child health information.
+
+## Risks
+
+### Pain May Be Founder-Specific
+
+The initial need comes from one parent's real experience. It may not generalize.
+
+Mitigation:
+
+- Validate with at least 5 target parents before building a public MVP.
+
+### Strongest Use Case Is Low Frequency
+
+Illness timeline review is valuable, but children are not always sick. Users may forget the product when the next illness happens.
+
+Mitigation:
+
+- Test whether bowel movement interval tracking can serve as a light health-related anchor.
+- Do not solve frequency by adding unrelated habit or learning features.
+
+### Bowel Movement Tracking May Not Create a Habit
+
+"Days since last bowel movement" is useful only after the parent opens the app. Without reliable reminders, sustained usage is uncertain.
+
+Mitigation:
+
+- Treat bowel tracking as an MVP assumption to validate, not as a proven retention mechanism.
+
+### Scope Creep Toward Parenting OS
+
+Because many child-related activities happen on dates, it is tempting to include learning, courses, tooth brushing, exercise, and rewards.
+
+Mitigation:
+
+- Keep MVP limited to health facts.
+- Reject non-health features unless the project definition changes.
+
+### Recording Cost May Exceed Current Tools
+
+If Happen is slower than paper or notes, parents will not switch.
+
+Mitigation:
+
+- Keep day-level illness notes.
+- Allow free text where structure would slow entry.
+- Make records editable.
+
+### Medical Trust Boundary
+
+Users may treat organized health information or future AI summaries as medical advice.
+
+Mitigation:
+
+- Do not include diagnosis or recommendations.
+- Keep AI out of MVP.
+- If AI is added later, restrict it to factual summaries of user-entered data.
+
+### WeChat Notification Limits
+
+Reminder-based retention may be unreliable in a Mini Program.
+
+Mitigation:
+
+- MVP must work without reliable push notifications.
+
+## Open Questions
+
+1. Do enough target parents have this problem?
+   - Validation standard: 5 interviews, at least 3 concrete pain cases, at least 2 willing to try/save the tool.
+
+2. Is the first public positioning stronger around illness timeline, bowel movement interval, or "child health fact record"?
+   - This should be tested with real parent responses, not decided only by internal reasoning.
+
+3. Should MVP support one child only or multiple children?
+   - Single child is simpler. Multiple children may be necessary for families with more than one child.
+
+4. How should an illness episode start and end?
+   - Options include manual episode creation, automatic grouping by consecutive illness day notes, or date-range selection.
+
+5. What is the minimum acceptable medicine input model?
+   - Free text is fastest. Multiple text entries may improve review. Structured medicine fields are out of scope for MVP.
+
+6. What is the minimum useful symptom input model?
+   - Free text and a few simple tags are possible. A complex symptom taxonomy is out of scope for MVP.
+
+7. Should bowel movement records support multiple records per day?
+   - MVP may only need "happened on date", but some parents may expect multiple records.
+
+8. What privacy model is required before public use?
+   - Child health data is sensitive. Account, storage, retention, deletion, and export expectations need explicit decisions.
+
+9. When should AI fact summary be introduced?
+   - Current decision: not in MVP. Revisit only after timeline recording and review are validated.
