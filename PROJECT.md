@@ -6,12 +6,15 @@ Happen is a WeChat Mini Program first product for parents of children aged 0-12.
 
 The first version focuses on recording and reviewing a small set of child health facts:
 
-- Bowel movement dates, so parents can quickly know how many days have passed since the last bowel movement.
-- Daily illness notes, so parents can explain a recent fever/illness episode clearly when visiting or revisiting a doctor.
+- Bowel movement records by date, so caregivers can quickly know how many days have passed since the last bowel movement and optionally note unusual observations.
+- Daily illness notes, so caregivers can explain a recent fever/illness episode clearly when visiting or revisiting a doctor.
+- Shared child records, so the caregiver who records facts and the caregiver who takes the child to the doctor can both access the same information.
 
 This file defines the project for AI agents and developers. It should guide future brainstorming, planning, TDD, implementation, and code review.
 
 Happen is not currently a broad child event tracker. The initial product should stay narrow until the core assumptions are validated with real parents.
+
+The product may support multiple children and multiple caregivers per child, but this exists to preserve the health fact review value. It should not turn Happen into a family social network, parenting community, or generic family management tool.
 
 ## Problem Statement
 
@@ -21,6 +24,7 @@ These methods are usable, but they break down in specific situations:
 
 - During a doctor visit, the parent cannot clearly answer when the fever started, how many days it lasted, the highest temperature, what medicines were taken, and how symptoms changed.
 - A child has irregular bowel movements, and the parent cannot quickly tell whether it has been 2, 3, or 4 days since the last bowel movement.
+- One caregiver may record the facts, while another caregiver takes the child to the doctor and needs to review the same facts.
 - A paper calendar is convenient at home, but not available during an outpatient visit unless the parent remembered to take a photo.
 - Excel is too slow and awkward on mobile for quick caregiving-context recording and review.
 
@@ -35,6 +39,7 @@ The core problem is:
 Primary users:
 
 - Parents of children aged 0-12.
+- Invited caregivers of children aged 0-12, such as grandparents, who help record or review the same child's health facts.
 - Parents who have previously been unable to clearly explain a child's recent illness history during a doctor visit.
 - Parents who need to track irregular bowel movements.
 - Parents who currently use memory, a paper calendar, notes apps, WeChat messages, or Excel for child health facts.
@@ -42,7 +47,7 @@ Primary users:
 
 Non-primary users:
 
-- Doctors, teachers, course providers, or caregivers as first-class users.
+- Doctors, teachers, course providers, or non-invited external caregivers as first-class users.
 - Parents looking for a complete child growth album.
 - Parents looking for medical advice, diagnosis, or treatment recommendations.
 - Parents looking for a generic habit tracker or learning task system.
@@ -53,8 +58,12 @@ Happen helps parents record a few important child health facts with low effort a
 
 The first version should help answer two questions:
 
-1. How many days has it been since the child's last bowel movement?
+1. How many days has it been since the child's last bowel movement, and how many times was it recorded on a specific day?
 2. During this illness episode, what happened each day: highest temperature, medicines taken, symptoms, and notes?
+
+The first version should also support a practical caregiving reality:
+
+> The person who records a child's health facts may not be the same person who needs to explain them later.
 
 Happen should be better than a paper calendar, notes app, or Excel only in these narrow ways:
 
@@ -62,12 +71,15 @@ Happen should be better than a paper calendar, notes app, or Excel only in these
 - Faster review of recent bowel movement interval.
 - Clearer day-by-day illness timeline for doctor visits or revisits.
 - Less dependence on memory or carrying a paper record.
+- Shared access among invited caregivers for the same child.
 
 ## Product Principles
 
 ### Record facts, not memories
 
 Happen records health facts that may need future review. It is not a place for sentimental growth memories, photos, family sharing, or social posts.
+
+Shared editing exists only so caregivers can maintain and review the same child's health facts. It should not introduce social features, feeds, comments, likes, or family albums.
 
 ### Review is more important than recording volume
 
@@ -102,6 +114,10 @@ Avoid medical-grade structured entry in MVP:
 - No strict dosage system.
 - No required exact time for every temperature or medicine.
 - No complex symptom taxonomy.
+- No required real names for children or caregivers.
+- No complex permission matrix in MVP.
+
+Default values may reduce input effort, but facts must only be saved after an explicit user action. Opening the Mini Program must never create a health fact automatically.
 
 ### Do not depend on notifications
 
@@ -117,15 +133,38 @@ If AI is added later, it must only summarize user-recorded facts.
 
 The MVP is limited to child health fact recording and review.
 
+MVP should support multiple children and invited caregivers, because this is part of making recorded facts available at the moment of need. The collaboration model must stay minimal: caregivers invited to a child can view and edit that child's MVP health facts.
+
+### Child And Caregiver Setup
+
+MVP should support:
+
+- Adding a child using a nickname rather than requiring a real name.
+- Selecting the current child when a user has access to more than one child.
+- Setting the user's caregiver label for each child, such as "Mom", "Dad", "Grandma", or a custom label.
+- Inviting another caregiver to a specific child.
+- Letting invited caregivers view and edit that child's bowel movement records, illness day notes, and illness timeline.
+- Showing lightweight creator and last-editor labels on records where useful.
+
+MVP should not require caregiver labels to be unique within a child. A caregiver label is a display label, not a permission identity or legal family relationship.
+
+MVP should not include family groups, role hierarchies, read-only permissions, approval flows, chat, comments, or activity feeds.
+
 ### Bowel Movement Tracking
 
 MVP should support:
 
-- Recording that a bowel movement happened on a specific date.
+- Recording bowel movements by date.
+- Increasing the count for a date when the caregiver records another bowel movement for that date.
+- Editing the count for a date.
+- Adding optional lightweight observation tags or notes when something is different from usual.
 - Editing or deleting a bowel movement record.
 - Showing how many days have passed since the most recent bowel movement.
+- Showing how many times bowel movements were recorded for the current day when relevant.
 
-MVP should not require stool type, color, amount, photos, or medical interpretation.
+MVP may provide lightweight observation tags such as "loose", "hard", "small amount", "frequent", or "strained" as quick record words.
+
+MVP should not require stool type, color, amount, photos, or medical interpretation. It should not provide stool classification, abnormality alerts, or long-term stool analytics.
 
 ### Illness Day Notes
 
@@ -141,22 +180,31 @@ Each illness day can contain:
 
 Medicine entries may include user-written timing such as "morning", "afternoon", "before sleep", or "around 8 PM", but the system should not enforce minute-level medical timelines.
 
+Symptom and medicine tags may be used as quick record words. Medicine tags must be presented as records of medicines already used, not as recommendations. The product should clearly state that quick medicine words are for recording only and are not medication advice.
+
+An illness day should be saved only after the caregiver explicitly confirms the form. The date may default to today, but opening the form should not create a record. At least one fact besides the date should be entered or selected before saving.
+
 ### Illness Timeline Review
 
 MVP should support:
 
-- Viewing an illness episode grouped by day.
-- Seeing the number of days in the illness episode.
+- Viewing an illness timeline grouped by day for a selected date range.
+- Defaulting the date range to the most recent 7 days, ending today.
+- Letting the caregiver adjust the start and end dates manually.
+- Seeing the number of days in the selected date range.
 - Reviewing daily highest temperature, medicine text, symptoms, and notes.
 
-The timeline should help a parent explain the illness to a doctor. It should not look like a diagnosis report.
+The timeline should help a caregiver explain the illness to a doctor. It should not look like a diagnosis report.
+
+MVP should not automatically infer illness episode boundaries. It should avoid language such as "automatically detected illness episode". The user-facing model should be "date range" rather than "system-identified episode".
 
 ### Lightweight Statistics
 
 MVP statistics are limited to:
 
 - Days since last bowel movement.
-- Duration of current/recent illness episode.
+- Bowel movement count for a selected date or the current day.
+- Number of days in the selected illness timeline date range.
 
 No dashboard-style analytics in MVP.
 
@@ -166,6 +214,8 @@ The following are explicitly out of scope for the first version:
 
 - Growth album.
 - Family photo timeline.
+- Family social network.
+- Family chat or comment feed.
 - Parenting community.
 - AI medical consultation.
 - Online doctor service.
@@ -183,7 +233,10 @@ The following are explicitly out of scope for the first version:
 - Drug database.
 - Dose calculation.
 - Symptom severity scoring.
+- Automatic illness episode detection.
+- Complex family roles or permission matrix.
 - Stool photo analysis.
+- Stool classification or medical interpretation.
 - Doctor-facing workflow.
 - Teacher-facing workflow.
 
@@ -195,7 +248,29 @@ These items should not be added during MVP planning unless the project definitio
 
 The child whose health facts are being recorded.
 
-MVP may assume a single child unless multi-child support is explicitly planned. If multi-child support is added, every health fact must belong to exactly one child.
+MVP should support more than one child. Every health fact must belong to exactly one child.
+
+The product should ask for a child nickname, not a required legal name.
+
+### Caregiver
+
+A user who can access and edit a child's health facts.
+
+A caregiver may have access to more than one child. A child may have more than one caregiver.
+
+Caregivers are invited per child. Being invited to one child should not automatically grant access to another child.
+
+### Caregiver Label
+
+A lightweight display label for a caregiver within a child, such as "Mom", "Dad", "Grandma", "Grandpa", or a custom label.
+
+The label helps records show who created or last edited a fact. It is not required to be unique and should not be treated as a permission role.
+
+### Child-Caregiver Membership
+
+The relationship that allows a caregiver to view and edit one child's health facts.
+
+MVP permissions are simple: every caregiver in a child's membership can view and edit that child's MVP health facts.
 
 ### Health Fact
 
@@ -210,23 +285,38 @@ Examples:
 
 Health facts should not contain diagnosis, medical advice, or AI-inferred certainty.
 
+Every health fact should store the child it belongs to, the creator, and the last editor.
+
 ### Bowel Movement Record
 
-A simple record that the child had a bowel movement on a date.
+A date-level record of bowel movements for a child.
+
+Expected fields:
+
+- Date.
+- Count.
+- Optional observation tags.
+- Optional notes.
+- Creator.
+- Last editor.
 
 Primary review question:
 
 > How many days has it been since the last bowel movement?
 
+Secondary review question:
+
+> How many times was it recorded on that date?
+
 ### Illness Episode
 
-A bounded period of illness that parents want to review as one timeline.
+A bounded period of illness that caregivers may want to review as one timeline.
 
 Example:
 
 > Fever started on June 1 and continued through June 3.
 
-MVP should support reviewing an episode by day. The exact episode boundary model is an open design question.
+MVP should not store or infer illness episodes as a separate required entity. Instead, caregivers choose a date range and review illness day notes grouped by day.
 
 ### Illness Day Note
 
@@ -239,10 +329,12 @@ Expected fields:
 - Medicines taken.
 - Main symptoms.
 - Notes.
+- Creator.
+- Last editor.
 
 ### Timeline
 
-A day-grouped review of an illness episode.
+A day-grouped review of illness day notes for a selected child and date range.
 
 The timeline should preserve original user-entered facts and avoid over-summarizing.
 
@@ -263,38 +355,39 @@ Not allowed:
 
 ## User Scenarios
 
-### Scenario 1: Parent Needs to Explain a Fever to a Doctor
+### Scenario 1: Caregiver Needs to Explain a Fever to a Doctor
 
 The child has had a fever for several days. At the clinic, the doctor asks when the fever started, how high it got, what medicines were used, and what symptoms appeared.
 
-The parent opens Happen and reviews the day-by-day illness timeline.
+The caregiver opens Happen, selects the child's recent date range if needed, and reviews the day-by-day illness timeline.
 
 Success condition:
 
-- The parent can answer from the timeline without relying on memory or searching scattered notes.
+- The caregiver can answer from the timeline without relying on memory or searching scattered notes.
 
-### Scenario 2: Parent Tracks Irregular Bowel Movement
+### Scenario 2: Caregiver Tracks Irregular Bowel Movement
 
 The child does not have a bowel movement every day. The parent wants to know whether it has been too long since the last bowel movement.
 
-The parent opens Happen and checks the "days since last bowel movement" value.
+The caregiver opens Happen and checks the "days since last bowel movement" value for the current child. If the child had multiple bowel movements today, the caregiver can record each occurrence and see the day's count.
 
 Success condition:
 
-- The parent can know the interval immediately after opening the app.
+- The caregiver can know the interval immediately after opening the app.
+- The caregiver can record multiple bowel movements on the same day without creating a complex log.
 
-### Scenario 3: Parent Records During a Busy Illness Day
+### Scenario 3: Caregiver Records During a Busy Illness Day
 
 The child is sick. The parent does not want to fill out a complex form.
 
-The parent records one daily note: highest temperature, medicines taken, symptoms, and a short note.
+The caregiver records one daily note: highest temperature, medicines taken, symptoms, and a short note. The date may default to today, but the note is saved only after explicit confirmation.
 
 Success condition:
 
 - The record is useful later even if it is not medically precise.
 - The parent does not abandon recording because of form complexity.
 
-### Scenario 4: Parent Updates a Day Record Later
+### Scenario 4: Caregiver Updates a Day Record Later
 
 The parent first records the morning situation, then later adds afternoon medicine or updates the highest temperature.
 
@@ -302,6 +395,17 @@ Success condition:
 
 - The daily record is editable.
 - The final day note reflects the parent's best available facts for that day.
+
+### Scenario 5: One Caregiver Records, Another Goes To The Doctor
+
+One caregiver recorded fever, medicine, bowel movement, or symptom facts at home. Another caregiver later takes the child to the clinic.
+
+The second caregiver opens the shared child record and reviews the same facts.
+
+Success condition:
+
+- The doctor-facing explanation does not depend on the recorder being physically present.
+- Shared editing does not require setting up a broad family workspace or social feed.
 
 ## Success Metrics
 
@@ -311,10 +415,12 @@ Better validation metrics:
 
 - In a pre-development validation sample of 5 target parents, at least 3 report a concrete difficulty with recording or reviewing child fever, medicine, bowel movement, or similar health facts.
 - In that same sample, at least 2 are willing to immediately save, try, or request access to a tool focused only on bowel movement interval and illness day notes.
-- During real use, parents can create a bowel movement record in a few seconds.
-- During real use, parents can create or update an illness day note without needing a precise medical timeline.
-- During a doctor visit or revisit, a parent can use the timeline to explain the illness history more clearly than memory, paper calendar, notes app, or Excel.
-- Parents who use Happen during one illness episode are willing to return during a later similar episode.
+- During real use, caregivers can create a bowel movement record in a few seconds.
+- During real use, caregivers can record multiple bowel movements on the same date without the UI becoming a detailed stool tracker.
+- During real use, caregivers can create or update an illness day note without needing a precise medical timeline.
+- During a doctor visit or revisit, a caregiver can use the selected date-range timeline to explain the illness history more clearly than memory, paper calendar, notes app, or Excel.
+- In a shared-care scenario, an invited caregiver can access the same child facts and explain them without relying on the original recorder.
+- Caregivers who use Happen during one illness episode are willing to return during a later similar episode.
 - Bowel movement tracking shows whether it can create a light checking habit without relying on push notifications.
 
 Failure signals:
@@ -322,6 +428,7 @@ Failure signals:
 - Users say the idea is "useful" but cannot describe a real recent recording/review problem.
 - Users prefer their paper calendar, notes app, WeChat messages, or Excel after trying the MVP.
 - Users only remember the product when shown it, but not when the actual health event happens.
+- Shared editing turns into family chat, social interaction, or role management before the health fact workflow is validated.
 - The product adds reading, points, course, exercise, or tooth brushing features to chase frequency before validating health facts.
 
 ## Technical Constraints
@@ -346,7 +453,10 @@ Development constraints:
 
 Product/technical implications:
 
-- Data model should allow health fact records to be grouped by child, date, and illness episode.
+- Data model should allow health fact records to be grouped by child and date.
+- Data model should support child-caregiver memberships, with every invited caregiver able to view and edit that child's MVP health facts.
+- Records should store creator and last-editor references for lightweight attribution.
+- Illness timeline review should use a selected date range, not a required stored episode entity.
 - User-facing UI should avoid generic "event management" language even if backend models use generic event-like storage.
 - Reminder design must not assume reliable WeChat push delivery.
 - Any future AI summary must retain links to original user records and must avoid medical advice.
@@ -398,6 +508,17 @@ Mitigation:
 - Allow free text where structure would slow entry.
 - Make records editable.
 
+### Shared Editing May Create Product Complexity
+
+Multiple caregivers and multiple children are real scenarios, but they can pull the product toward family management.
+
+Mitigation:
+
+- Share access per child, not through a broad family workspace.
+- Give every invited caregiver edit access in MVP.
+- Use caregiver labels only as display labels.
+- Avoid role hierarchy, read-only permissions, comments, chat, and activity feeds.
+
 ### Medical Trust Boundary
 
 Users may treat organized health information or future AI summaries as medical advice.
@@ -424,11 +545,11 @@ Mitigation:
 2. Is the first public positioning stronger around illness timeline, bowel movement interval, or "child health fact record"?
    - This should be tested with real parent responses, not decided only by internal reasoning.
 
-3. Should MVP support one child only or multiple children?
-   - Single child is simpler. Multiple children may be necessary for families with more than one child.
+3. What is the simplest acceptable invitation flow for shared child records?
+   - Current decision: invite per child. Invited caregivers can edit. Caregiver labels are not unique and are only display labels.
 
-4. How should an illness episode start and end?
-   - Options include manual episode creation, automatic grouping by consecutive illness day notes, or date-range selection.
+4. How should the date-range timeline defaults feel in real use?
+   - Current decision: default to the most recent 7 days ending today, with manual adjustment.
 
 5. What is the minimum acceptable medicine input model?
    - Free text is fastest. Multiple text entries may improve review. Structured medicine fields are out of scope for MVP.
@@ -436,8 +557,8 @@ Mitigation:
 6. What is the minimum useful symptom input model?
    - Free text and a few simple tags are possible. A complex symptom taxonomy is out of scope for MVP.
 
-7. Should bowel movement records support multiple records per day?
-   - MVP may only need "happened on date", but some parents may expect multiple records.
+7. Which bowel movement observation tags are useful without becoming medical stool classification?
+   - Current decision: support a count per date and optional lightweight observation tags/notes. Avoid classification and interpretation.
 
 8. What privacy model is required before public use?
    - Child health data is sensitive. Account, storage, retention, deletion, and export expectations need explicit decisions.
