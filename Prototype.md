@@ -754,7 +754,81 @@ Required prototype behavior:
 - Settings and invitation stay out of daily surfaces.
 - Corrections remain easy when needed.
 
-## 8. UX Acceptance Checks
+## 8. Fever Recording Speed Check
+
+This is a special MVP efficiency check.
+
+Scenario:
+
+> A parent has just noticed the child has a fever of 38.5 C. The parent opens Happen and wants to record it.
+
+### Current Prototype Simulation
+
+Assumption: the parent already has one child set up, Home is the first screen after opening, and the illness form date defaults to today.
+
+Step-by-step:
+
+1. Open Happen.
+2. Tap `Record illness`.
+3. Tap the highest temperature field.
+4. Type `38.5`.
+5. Tap `Save`.
+
+Measured interaction cost:
+
+- Clicks/taps: 3.
+  - `Record illness`.
+  - Temperature field.
+  - `Save`.
+- Text inputs: 1.
+  - `38.5`.
+- Page transitions: 2.
+  - App open to Home.
+  - Home to Illness Day Form.
+- Estimated completion time: about 6-8 seconds for a typical parent, because numeric input and keyboard focus add friction.
+
+### Result
+
+This is an experience issue under the MVP rule.
+
+Why:
+
+- The flow is at the maximum allowed click count.
+- The estimated time is likely over 5 seconds.
+- The parent is in a high-stress moment and should not need to visually scan a general illness form before saving the most common fever fact.
+
+### Optimization Recommendation
+
+For the fever case, Home should support a faster illness temperature path without adding a new product feature.
+
+Recommended interaction:
+
+1. Tap `Record illness`.
+2. The illness form opens with the temperature field already focused and numeric keyboard open.
+3. Type `38.5`.
+4. Tap `Save` from the keyboard-safe primary action area.
+
+Target cost:
+
+- Clicks/taps: 2.
+  - `Record illness`.
+  - `Save`.
+- Text inputs: 1.
+  - `38.5`.
+- Page transitions: 2.
+  - App open to Home.
+  - Home to Illness Day Form.
+- Target completion time: 4-5 seconds.
+
+Prototype requirement:
+
+- The first focus in the illness form should be the highest temperature input.
+- The numeric keyboard should appear automatically when platform behavior allows it and does not feel disruptive.
+- The Save action must remain visible or easy to reach while the keyboard is open.
+- If automatic focus is not reliable in the Mini Program environment, the illness form should offer a first-row quick temperature entry area so the first tap after opening can enter temperature immediately.
+- The form must still allow symptom-only or note-only illness records; this optimization only improves the fever fast path.
+
+## 9. UX Acceptance Checks
 
 Use these checks before Figma design and implementation:
 
@@ -770,3 +844,5 @@ Use these checks before Figma design and implementation:
 10. Can an invited caregiver join one child and land directly in that child's Home?
 11. Is Records absent from MVP bottom navigation?
 12. Are invitation and add-child actions kept out of the daily recording path?
+13. In the fever 38.5 C scenario, can the caregiver finish within 5 seconds and no more than 3 taps?
+14. Does the illness form avoid requiring a separate tap into the temperature field when the user enters from `Record illness`?
